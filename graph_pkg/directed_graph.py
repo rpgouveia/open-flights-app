@@ -10,7 +10,7 @@ class DirectedGraph:
         self.vertices = list(range(size))
 
     # Métodos básicos
-    def create_adjacency(self, i: int, j: int, weight: int):
+    def create_adjacency(self, i: int, j: int, weight: float):
         """Cria adjacência direcionada de i → j com o peso especificado."""
         self.adjacency_list[i].insert(j, weight)
 
@@ -221,7 +221,7 @@ class DirectedGraph:
         print(f"Busca em largura recursiva a partir de {self.vertices[start]}:")
         self.breadth_first_search_recursive(visited, queue)
 
-# Verificação de ciclos, componentes, conectividade
+    # Métodos para verificação de ciclos, componentes, conectividade
     def has_cycle_util(self, vertex: int, visited: list[bool], rec_stack: list[bool]) -> bool:
         """Função auxiliar para detectar ciclos usando DFS. O(v + e)"""
         visited[vertex] = True

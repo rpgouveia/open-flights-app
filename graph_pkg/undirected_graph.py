@@ -10,7 +10,7 @@ class UndirectedGraph:
         self.vertices = list(range(size))
 
     # Métodos básicos
-    def create_adjacency(self, i: int, j: int, weight: int):
+    def create_adjacency(self, i: int, j: int, weight: float):
         """
         Cria adjacência NÃO DIRECIONADA entre i e j com o peso especificado.
         Insere i → j e j → i para refletir a natureza bidirecional da aresta.
@@ -55,7 +55,7 @@ class UndirectedGraph:
         print(f"{count} adjacente(s) ao vértice {self.vertices[vertex]}: {labels}")
 
     # Algoritmo de Prim — Árvore Geradora Mínima
-    def prim(self, start: int = 0) -> tuple[list[tuple[int, int, int]], int]:
+    def prim(self, start: int = 0) -> tuple[list[tuple[int, int, float]], float]:
         """
         Encontra a Árvore Geradora Mínima (AGM) pelo algoritmo de Prim. O(v²)
 
@@ -121,7 +121,7 @@ class UndirectedGraph:
         print(f"  Arestas na AGM: {len(mst_edges)}")
 
     # Algoritmo de Kruskal — Árvore Geradora Mínima
-    def _collect_edges(self) -> list[tuple[int, int, int]]:
+    def _collect_edges(self) -> list[tuple[float, int, int]]:
         """
         Coleta todas as arestas únicas do grafo como tuplas (peso, i, j).
         Como cada aresta é armazenada duas vezes na lista de adjacência,
@@ -158,7 +158,7 @@ class UndirectedGraph:
             parent[root_b] = root_a
             rank[root_a] += 1
 
-    def kruskal(self) -> tuple[list[tuple[int, int, int]], int]:
+    def kruskal(self) -> tuple[list[tuple[int, int, float]], float]:
         """
         Encontra a Árvore Geradora Mínima (AGM) pelo algoritmo de Kruskal. O(e log e)
 

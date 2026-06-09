@@ -1,5 +1,5 @@
 class Node:
-    def __init__(self, destination: int, weight: int):
+    def __init__(self, destination: int, weight: float):
         self.destination = destination
         self.weight = weight
         self.next = None
@@ -10,7 +10,7 @@ class LinkedList:
         self.head = None
         self.length = 0
 
-    def insert(self, destination: int, weight: int):
+    def insert(self, destination: int, weight: float):
         """Insere um novo nó no início da lista. O(1)"""
         new_node = Node(destination, weight)
         new_node.next = self.head
