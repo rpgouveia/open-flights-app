@@ -221,7 +221,7 @@ class DirectedGraph:
         print(f"Busca em largura recursiva a partir de {self.vertices[start]}:")
         self.breadth_first_search_recursive(visited, queue)
 
-    # Métodos para verificação de ciclos, componentes, conectividade
+# Verificação de ciclos, componentes, conectividade
     def has_cycle_util(self, vertex: int, visited: list[bool], rec_stack: list[bool]) -> bool:
         """Função auxiliar para detectar ciclos usando DFS. O(v + e)"""
         visited[vertex] = True
@@ -238,3 +238,58 @@ class DirectedGraph:
         rec_stack[vertex] = False
         return False
 
+    def _build_undirected_adjacency(self) -> list[list[int]]:
+        """
+        Constrói uma visão NÃO DIRECIONADA das adjacências do grafo. O(v + e)
+        Para cada arco i → j, registra j como vizinho de i e i como vizinho de j.
+        Usada nas análises de conexidade fraca e componentes fracamente conectados.
+        Não modifica o estado interno do grafo.
+        """
+        neighbors = [[] for _ in range(self.size)]
+        for origin in range(self.size):
+            for node in self.adjacency_list[origin]:
+                destination = node.destination
+                neighbors[origin].append(destination)
+                neighbors[destination].append(origin)
+        return neighbors
+
+    def is_connected(self) -> bool:
+        """
+        Verifica se o grafo é fracamente conexo. O(v + e)
+
+        Um grafo direcionado é fracamente conexo quando, ignorando a direção
+        dos arcos, existe caminho entre qualquer par de vértices. Ou seja,
+        ao tratar os arcos como bidirecionais, uma única travessia a partir
+        de um vértice qualquer alcança todos os demais.
+
+        Retorna True se o grafo é fracamente conexo, False caso contrário.
+        Um grafo vazio ou com um único vértice é considerado conexo.
+        """
+        if self.size <= 1:
+            return True
+
+        neighbors = self._build_undirected_adjacency()
+        visited = [False] * self.size
+
+        # travessia em largura a partir do vértice 0
+        queue = [0]
+        visited[0] = True
+        visited_count = 1
+
+        while queue:
+            current = queue.pop(0)
+            for neighbor in neighbors[current]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    visited_count += 1
+                    queue.append(neighbor)
+
+        # conexo se a travessia alcançou todos os vértices
+        return visited_count == self.size
+
+    def print_connectivity(self):
+        """Imprime se o grafo é fracamente conexo ou não."""
+        if self.is_connected():
+            print("O grafo é fracamente conexo.")
+        else:
+            print("O grafo NÃO é fracamente conexo (possui componentes separados).")
