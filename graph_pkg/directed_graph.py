@@ -594,6 +594,10 @@ class DirectedGraph:
         para obter as distâncias mínimas. Vértices inalcançáveis são ignorados
         na soma.
 
+        Referência: 
+            Wasserman, S., & Faust, K. (1994). Social Network Analysis: Methods and Applications. Cambridge University Press.
+            https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.closeness_centrality.html
+
         Parâmetros:
             vertices:   lista opcional de índices a considerar como origem.
                         Se None, considera todos os vértices do grafo.

@@ -10,11 +10,21 @@ import time
 from graph_pkg.directed_graph import DirectedGraph
 from pajek import write_pajek
 from openflights import build_graph
+from centrality_log import write_centrality_log
 
 
 # caminhos dos arquivos de dados
 AIRPORTS_PATH = "dataset/airports.dat"
 ROUTES_PATH = "dataset/routes.dat"
+
+
+def _imprimir_top(grafo, centrality: dict, nome: str, formato: str, top: int = 10):
+    """Imprime os top vertices de uma medida de centralidade ja calculada."""
+    ranking = sorted(centrality.items(), key=lambda par: par[1], reverse=True)
+    print(f"Top {top} vertices por centralidade de {nome}:")
+    for posicao, (vertice, valor) in enumerate(ranking[:top], start=1):
+        rotulo = grafo.vertices[vertice]
+        print(f"  {posicao:>2}. {rotulo}: {formato.format(valor)}")
 
 
 def contar_arcos(grafo: DirectedGraph) -> int:
@@ -96,15 +106,25 @@ def main():
 
     print("\nCalculando centralidade de proximidade...")
     inicio = time.time()
-    grafo.print_closeness_centrality(vertices=maior_componente, top=10)
+    closeness = grafo.closeness_centrality(vertices=maior_componente)
     tempo = time.time() - inicio
+    _imprimir_top(grafo, closeness, "proximidade", "{:.6f}", top=10)
     print(f"Concluido em {tempo:.1f}s")
 
     print("\nCalculando centralidade de intermediacao...")
     inicio = time.time()
-    grafo.print_betweenness_centrality(vertices=maior_componente, top=10)
+    betweenness = grafo.betweenness_centrality(vertices=maior_componente)
     tempo = time.time() - inicio
+    _imprimir_top(grafo, betweenness, "intermediacao", "{:.0f}", top=10)
     print(f"Concluido em {tempo:.1f}s")
+
+    # grava o log das centralidades em arquivo de texto
+    caminho_log = "centrality.log"
+    print(f"\nGravando log das centralidades em '{caminho_log}'...")
+    write_centrality_log(
+        grafo, closeness, betweenness, caminho_log,top=10, component_size=len(maior_componente)
+    )
+    print("Log gravado.")
 
     print("\nTeste concluido.")
 
