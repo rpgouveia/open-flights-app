@@ -75,6 +75,14 @@ def main():
     print(f"Verificacao concluida em {tempo:.2f}s")
     grafo.print_eulerian_path()
 
+    # ciclicidade
+    print("\nVerificando existencia de ciclo...")
+    inicio = time.time()
+    grafo.is_cyclic()
+    tempo = time.time() - inicio
+    print(f"Verificacao concluida em {tempo:.2f}s")
+    grafo.print_cyclic()
+
     print("\nTeste concluido.")
 
 

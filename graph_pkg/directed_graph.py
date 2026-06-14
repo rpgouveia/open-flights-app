@@ -223,7 +223,10 @@ class DirectedGraph:
 
 # Verificação de ciclos, componentes, conectividade
     def has_cycle_util(self, vertex: int, visited: list[bool], rec_stack: list[bool]) -> bool:
-        """Função auxiliar para detectar ciclos usando DFS. O(v + e)"""
+        """
+        Função auxiliar para detectar ciclos usando DFS. O(v + e)  
+        Busca em profundidade recursiva com controle de pilha de recursão para detectar ciclos.
+        """
         visited[vertex] = True
         rec_stack[vertex] = True
 
@@ -237,6 +240,62 @@ class DirectedGraph:
 
         rec_stack[vertex] = False
         return False
+
+    def is_cyclic(self) -> bool:
+        """
+        Verifica se o grafo direcionado possui pelo menos um ciclo. O(v + e)  
+        Busca em profundidade iterativa com controle de pilha de recursão para detectar ciclos.
+
+        Um ciclo existe quando, durante a travessia, um arco aponta para um
+        vértice que ainda está no caminho atual (pilha de recursão).
+
+        Cada vértice passa por dois momentos na pilha:
+            - descoberta: entra na pilha de recursão (caminho atual)
+            - finalização: sai da pilha de recursão (todos os vizinhos visitados)
+
+        Retorna True se há ciclo, False caso contrário.
+        """
+        visited = [False] * self.size
+        in_stack = [False] * self.size
+
+        for start in range(self.size):
+            if visited[start]:
+                continue
+
+            stack = [(start, False)]
+
+            # pilha de pares (vértice, finalizacao)
+            # finalizacao=False → descoberta
+            # finalizacao=True  → remover da pilha de recursão
+            while stack:
+                vertex, finishing = stack.pop()
+
+                if finishing:
+                    in_stack[vertex] = False
+                    continue
+
+                if visited[vertex]:
+                    continue
+
+                visited[vertex] = True
+                in_stack[vertex] = True
+                stack.append((vertex, True))
+
+                for node in self.adjacency_list[vertex]:
+                    destination = node.destination
+                    if not visited[destination]:
+                        stack.append((destination, False))
+                    elif in_stack[destination]:
+                        return True
+
+        return False
+
+    def print_cyclic(self):
+        """Imprime se o grafo possui ciclo ou não."""
+        if self.is_cyclic():
+            print("O grafo possui ciclo (e ciclico).")
+        else:
+            print("O grafo NAO possui ciclo (e aciclico).")
 
     def _build_undirected_adjacency(self) -> list[list[int]]:
         """
