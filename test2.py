@@ -83,6 +83,29 @@ def main():
     print(f"Verificacao concluida em {tempo:.2f}s")
     grafo.print_cyclic()
 
+    # centralidades (calculadas sobre o maior componente, por desempenho)
+    print("\n" + "=" * 55)
+    print("Medidas de centralidade (maior componente)")
+    print("=" * 55)
+
+    comps = grafo.connected_components()
+    comps.sort(key=len, reverse=True)
+    maior_componente = comps[0]
+    print(f"\nMaior componente: {len(maior_componente)} aeroportos")
+    print("(o calculo leva algumas dezenas de segundos)")
+
+    print("\nCalculando centralidade de proximidade...")
+    inicio = time.time()
+    grafo.print_closeness_centrality(vertices=maior_componente, top=10)
+    tempo = time.time() - inicio
+    print(f"Concluido em {tempo:.1f}s")
+
+    print("\nCalculando centralidade de intermediacao...")
+    inicio = time.time()
+    grafo.print_betweenness_centrality(vertices=maior_componente, top=10)
+    tempo = time.time() - inicio
+    print(f"Concluido em {tempo:.1f}s")
+
     print("\nTeste concluido.")
 
 

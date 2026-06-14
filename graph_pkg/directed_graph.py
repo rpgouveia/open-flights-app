@@ -1,3 +1,4 @@
+import heapq
 from .linked_list import LinkedList
 
 
@@ -117,6 +118,46 @@ class DirectedGraph:
                 if new_distance < distance[node.destination]:
                     distance[node.destination] = new_distance
                     previous[node.destination] = min_distance_vertex
+
+        return distance, previous
+
+    def dijkstra_heap(self, origin: int) -> tuple[list[float], list[int]]:
+        """
+        Executa o algoritmo de Dijkstra usando fila de prioridade (heap).
+        O((n + e) log n)
+
+        Versão otimizada do dijkstra() para grafos esparsos. Em vez de varrer
+        todos os vértices a cada passo para achar o de menor distância, usa um
+        heap binário (heapq) que entrega o mínimo em tempo logarítmico.
+
+        Retorna (distance, previous), com o mesmo significado de dijkstra():
+            distance[i] → custo mínimo de origin até i (float('inf') se inalcançável)
+            previous[i] → índice do vértice anterior no caminho mínimo até i (-1 se nenhum)
+        """
+        distance = [float("inf")] * self.size
+        previous = [-1] * self.size
+        visited = [False] * self.size
+
+        distance[origin] = 0.0
+
+        # heap de pares (distancia_acumulada, vertice)
+        heap = [(0.0, origin)]
+
+        while heap:
+            current_distance, current = heapq.heappop(heap)
+
+            # ignora entradas obsoletas
+            if visited[current]:
+                continue
+            visited[current] = True
+
+            for node in self.adjacency_list[current]:
+                destination = node.destination
+                new_distance = current_distance + node.weight
+                if new_distance < distance[destination]:
+                    distance[destination] = new_distance
+                    previous[destination] = current
+                    heapq.heappush(heap, (new_distance, destination))
 
         return distance, previous
 
@@ -279,6 +320,8 @@ class DirectedGraph:
 
                 visited[vertex] = True
                 in_stack[vertex] = True
+
+                # agenda a finalização deste vértice
                 stack.append((vertex, True))
 
                 for node in self.adjacency_list[vertex]:
@@ -531,3 +574,133 @@ class DirectedGraph:
             print("O grafo possui um caminho euleriano.")
         else:
             print("O grafo NAO possui um caminho euleriano.")
+
+    # Medidas de Centralidade
+    def closeness_centrality(self, vertices: list[int] = None) -> dict[int, float]:
+        """
+        Calcula a centralidade de proximidade (closeness) dos vértices. O(k (n+e) log n)
+
+        Usa a fórmula normalizada de Wasserman-Faust, adequada a grafos desconexos.  
+        A proximidade de um vértice combina duas ideias:  
+            - quão perto ele está dos vértices que alcança (alcançáveis / soma das distâncias)  
+            - que fração do total de vértices ele consegue alcançar (alcançáveis / (n - 1))
+
+        O produto dos dois fatores evita a distorção da fórmula clássica, na
+        qual um vértice que alcança pouquíssimos outros, mas muito próximos,
+        receberia um valor artificialmente alto. Quanto maior o resultado,
+        mais central é o vértice.
+
+        Como o grafo é direcionado e ponderado, usa Dijkstra (versão com heap)
+        para obter as distâncias mínimas. Vértices inalcançáveis são ignorados
+        na soma.
+
+        Parâmetros:
+            vertices:   lista opcional de índices a considerar como origem.
+                        Se None, considera todos os vértices do grafo.
+                        Passar apenas os vértices do maior componente acelera o cálculo.
+
+        Retorna um dicionário {indice_do_vertice: valor_de_proximidade}.
+        """
+        if vertices is None:
+            vertices = list(range(self.size))
+
+        # número máximo de outros vértices que poderiam ser alcançados
+        max_reachable = self.size - 1
+
+        centrality = {}
+
+        for origin in vertices:
+            distance, _ = self.dijkstra_heap(origin)
+
+            # soma as distâncias até os vértices alcançáveis (exceto o próprio)
+            reachable_count = 0
+            distance_sum = 0.0
+            for target in range(self.size):
+                if target != origin and distance[target] != float("inf"):
+                    reachable_count += 1
+                    distance_sum += distance[target]
+
+            # proximidade normalizada de Wasserman-Faust
+            if distance_sum > 0 and max_reachable > 0:
+                proximity = reachable_count / distance_sum
+                reach_fraction = reachable_count / max_reachable
+                centrality[origin] = proximity * reach_fraction
+            else:
+                centrality[origin] = 0.0
+
+        return centrality
+
+    def print_closeness_centrality(self, vertices: list[int] = None, top: int = 10):
+        """
+        Imprime os vértices com maior centralidade de proximidade.
+
+        Calcula a proximidade e exibe os 'top' vértices de maior valor,
+        que correspondem aos mais bem posicionados (mais próximos de todos
+        os demais em distância de caminho mínimo).
+        """
+        centrality = self.closeness_centrality(vertices)
+
+        # ordena do maior para o menor valor de proximidade
+        ranking = sorted(centrality.items(), key=lambda pair: pair[1], reverse=True)
+
+        print(f"Top {top} vertices por centralidade de proximidade:")
+        for position, (vertex, value) in enumerate(ranking[:top], start=1):
+            label = self.vertices[vertex]
+            print(f"  {position:>2}. {label}: {value:.6f}")
+
+    def betweenness_centrality(self, vertices: list[int] = None) -> dict[int, float]:
+        """
+        Calcula a centralidade de intermediação (betweenness) dos vértices.
+        O(k (n+e) log n)
+
+        Esta implementação reaproveita o Dijkstra (versão com heap) e reconstrói
+        UM caminho mínimo por par origem-destino, usando o vetor de predecessores.
+        Quando há vários caminhos mínimos de mesmo comprimento, apenas um é
+        contado, então o resultado é uma APROXIMAÇÃO por caminho único.
+
+        Parâmetros:
+            vertices:   lista opcional de índices a considerar como origem.
+                        Se None, considera todos os vértices do grafo.
+                        Passar apenas os vértices do maior componente acelera o cálculo.
+
+        Retorna um dicionário {indice_do_vertice: contagem_de_intermediacao}.
+        """
+        if vertices is None:
+            vertices = list(range(self.size))
+
+        # inicializa a contagem de intermediação de todos os vértices
+        centrality = {vertex: 0.0 for vertex in range(self.size)}
+
+        for origin in vertices:
+            distance, previous = self.dijkstra_heap(origin)
+
+            # para cada destino alcançável, percorre o caminho mínimo de volta
+            for target in range(self.size):
+                if target == origin or distance[target] == float("inf"):
+                    continue
+
+                # caminha do destino até a origem pelos predecessores,
+                # creditando os vértices intermediários (exclui origem e destino)
+                current = previous[target]
+                while current != -1 and current != origin:
+                    centrality[current] += 1
+                    current = previous[current]
+
+        return centrality
+
+    def print_betweenness_centrality(self, vertices: list[int] = None, top: int = 10):
+        """
+        Imprime os vértices com maior centralidade de intermediação.
+
+        Calcula a intermediação e exibe os 'top' vértices de maior valor,
+        que correspondem aos principais pontos de passagem (hubs/pontes) da rede.
+        """
+        centrality = self.betweenness_centrality(vertices)
+
+        # ordena do maior para o menor valor de intermediação
+        ranking = sorted(centrality.items(), key=lambda pair: pair[1], reverse=True)
+
+        print(f"Top {top} vertices por centralidade de intermediacao:")
+        for position, (vertex, value) in enumerate(ranking[:top], start=1):
+            label = self.vertices[vertex]
+            print(f"  {position:>2}. {label}: {int(value)}")
