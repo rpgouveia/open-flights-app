@@ -293,3 +293,83 @@ class DirectedGraph:
             print("O grafo é fracamente conexo.")
         else:
             print("O grafo NÃO é fracamente conexo (possui componentes separados).")
+
+    def connected_components(self) -> list[list[int]]:
+        """
+        Encontra os componentes fracamente conectados do grafo. O(v + e)
+
+        Trata os arcos como bidirecionais e percorre o grafo a partir de
+        cada vértice ainda não visitado. Cada travessia descobre todos os
+        vértices de um componente.
+
+        Retorna uma lista de componentes, onde cada componente é a lista
+        dos índices dos vértices que o compõem.
+        """
+        neighbors = self._build_undirected_adjacency()
+        visited = [False] * self.size
+        components = []
+
+        for start in range(self.size):
+            if visited[start]:
+                continue
+
+            # travessia em largura
+            component = []
+            queue = [start]
+            visited[start] = True
+
+            while queue:
+                current = queue.pop(0)
+                component.append(current)
+                for neighbor in neighbors[current]:
+                    if not visited[neighbor]:
+                        visited[neighbor] = True
+                        queue.append(neighbor)
+
+            components.append(component)
+
+        return components
+
+    def print_connected_components(
+            self, max_components_shown: int = 10,
+            max_vertices_shown: int = 10
+        ):
+        """
+        Imprime os componentes fracamente conectados do grafo.
+
+        Exibe o número total de componentes e detalha os maiores, limitado
+        por max_components_shown. Componentes de um único vértice (isolados)
+        são resumidos numa contagem, evitando milhares de linhas.
+
+        Para componentes grandes, mostra apenas os primeiros rótulos
+        (limitados por max_vertices_shown).
+        """
+        components = self.connected_components()
+        components.sort(key=len, reverse=True)
+
+        isolated = [c for c in components if len(c) == 1]
+        non_isolated = [c for c in components if len(c) > 1]
+
+        print(f"Total de componentes fracamente conectados: {len(components)}")
+        print(f"  Componentes com mais de um vertice: {len(non_isolated)}")
+        print(f"  Vertices isolados (sem conexao): {len(isolated)}")
+
+        shown_count = min(len(non_isolated), max_components_shown)
+        if shown_count > 0:
+            print(f"\nMaiores componentes (ate {max_components_shown}):")
+
+        for position in range(shown_count):
+            component = non_isolated[position]
+            size = len(component)
+            labels = [str(self.vertices[index]) for index in component]
+
+            if size > max_vertices_shown:
+                shown = ", ".join(labels[:max_vertices_shown])
+                print(f"  Componente {position + 1} ({size} vertices): {shown}, ...")
+            else:
+                shown = ", ".join(labels)
+                print(f"  Componente {position + 1} ({size} vertices): {shown}")
+
+        remaining = len(non_isolated) - shown_count
+        if remaining > 0:
+            print(f"  ... e mais {remaining} componente(s) com mais de um vertice.")

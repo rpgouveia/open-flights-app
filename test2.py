@@ -60,6 +60,13 @@ def main():
     print(f"Verificacao concluida em {tempo:.2f}s")
     grafo.print_connectivity()
 
+    # componentes fracamente conectados
+    print("\nIdentificando componentes fracamente conectados...")
+    inicio = time.time()
+    grafo.print_connected_components()
+    tempo = time.time() - inicio
+    print(f"\nAnalise de componentes concluida em {tempo:.2f}s")
+
     print("\nTeste concluido.")
 
 
