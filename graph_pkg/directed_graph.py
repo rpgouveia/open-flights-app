@@ -373,3 +373,102 @@ class DirectedGraph:
         remaining = len(non_isolated) - shown_count
         if remaining > 0:
             print(f"  ... e mais {remaining} componente(s) com mais de um vertice.")
+
+    def _degrees(self) -> tuple[list[int], list[int]]:
+        """
+        Calcula o grau de entrada e o grau de saída de cada vértice. O(v + e)
+
+        Retorna (out_degree, in_degree):
+            out_degree[i] → número de arcos que saem do vértice i
+            in_degree[i]  → número de arcos que chegam ao vértice i
+        """
+        out_degree = [0] * self.size
+        in_degree = [0] * self.size
+
+        for origin in range(self.size):
+            for node in self.adjacency_list[origin]:
+                out_degree[origin] += 1
+                in_degree[node.destination] += 1
+
+        return out_degree, in_degree
+
+    def _has_eulerian_connectivity(self) -> bool:
+        """
+        Verifica se todos os vértices que possuem algum arco (de entrada ou
+        saída) pertencem a um único componente fracamente conectado. O(v + e)
+
+        Vértices sem nenhum arco são ignorados, pois não participam de um
+        eventual caminho euleriano. Essa conexão é pré-requisito para a
+        existência de caminho ou circuito euleriano.
+        """
+        out_degree, in_degree = self._degrees()
+        neighbors = self._build_undirected_adjacency()
+
+        # encontra um vértice de partida que tenha pelo menos um arco
+        start = -1
+        for vertex in range(self.size):
+            if out_degree[vertex] + in_degree[vertex] > 0:
+                start = vertex
+                break
+
+        if start == -1:
+            return True
+
+        # travessia em largura
+        visited = [False] * self.size
+        queue = [start]
+        visited[start] = True
+
+        while queue:
+            current = queue.pop(0)
+            for neighbor in neighbors[current]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    queue.append(neighbor)
+
+        # todo vértice com algum arco precisa ter sido alcançado
+        for vertex in range(self.size):
+            if out_degree[vertex] + in_degree[vertex] > 0 and not visited[vertex]:
+                return False
+
+        return True
+
+    def has_eulerian_path(self) -> bool:
+        """
+        Verifica se o grafo direcionado possui um caminho euleriano. O(v + e)
+
+        Um caminho euleriano percorre cada arco exatamente uma vez, sem
+        necessariamente retornar ao vértice de origem. Para um grafo
+        direcionado, existe caminho euleriano quando:
+
+        1. No máximo um vértice tem (saída - entrada) = 1 — seria o início.
+        2. No máximo um vértice tem (entrada - saída) = 1 — seria o fim.
+        3. Todos os demais vértices têm grau de entrada igual ao de saída.
+        4. Os vértices com arcos formam um único componente conexo.
+
+        Retorna True se existe caminho euleriano, False caso contrário.
+        """
+        out_degree, in_degree = self._degrees()
+
+        start_vertices = 0   # vértices com um arco de saída a mais
+        end_vertices = 0     # vértices com um arco de entrada a mais
+
+        for vertex in range(self.size):
+            difference = out_degree[vertex] - in_degree[vertex]
+            if difference == 1:
+                start_vertices += 1
+            elif difference == -1:
+                end_vertices += 1
+            elif difference != 0:
+                return False
+
+        degrees_ok = start_vertices <= 1 and end_vertices <= 1
+
+        return degrees_ok and self._has_eulerian_connectivity()
+
+    def print_eulerian_path(self):
+        """Imprime se o grafo possui um caminho euleriano."""
+        if self.has_eulerian_path():
+            print("O grafo possui um caminho euleriano.")
+        else:
+            print("O grafo NAO possui um caminho euleriano.")

@@ -67,6 +67,14 @@ def main():
     tempo = time.time() - inicio
     print(f"\nAnalise de componentes concluida em {tempo:.2f}s")
 
+    # caminho euleriano
+    print("\nVerificando existencia de caminho euleriano...")
+    inicio = time.time()
+    grafo.has_eulerian_path()
+    tempo = time.time() - inicio
+    print(f"Verificacao concluida em {tempo:.2f}s")
+    grafo.print_eulerian_path()
+
     print("\nTeste concluido.")
 
 
