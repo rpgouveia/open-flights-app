@@ -27,7 +27,7 @@ def testar_grafo_pequeno():
     print("=" * 55)
 
     grafo = generate_random_graph(
-        num_vertices=6, num_arcs=10,
+        num_vertices=6, num_arcs=10, connected=True,
         min_weight=100.0, max_weight=5000.0,
         seed=42,
     )
@@ -38,21 +38,28 @@ def testar_grafo_pequeno():
 
 
 def testar_algoritmos_sobre_gerado():
-    """Aplica os algoritmos do projeto sobre um grafo gerado."""
+    """Aplica os algoritmos do projeto sobre grafos gerados (conexo e desconexo)."""
     print("\n" + "=" * 55)
     print("TESTE 2: Algoritmos sobre o grafo gerado")
     print("=" * 55)
 
-    grafo = generate_random_graph(num_vertices=20, num_arcs=60, seed=7)
-    print(f"\nGrafo gerado: {grafo.size} vertices, {contar_arcos(grafo)} arcos")
+    # grafo gerado como conexo
+    print("\n--- Grafo gerado com connected=True ---")
+    grafo_conexo = generate_random_graph(20, 60, connected=True, seed=7)
+    print(f"Grafo: {grafo_conexo.size} vertices, {contar_arcos(grafo_conexo)} arcos")
+    grafo_conexo.print_connectivity()
+    grafo_conexo.print_cyclic()
+    componentes = grafo_conexo.connected_components()
+    print(f"Numero de componentes: {len(componentes)}")
 
-    print()
-    grafo.print_connectivity()
-    grafo.print_cyclic()
-    grafo.print_eulerian_path()
-
-    componentes = grafo.connected_components()
-    print(f"Numero de componentes fracamente conectados: {len(componentes)}")
+    # grafo gerado como desconexo
+    print("\n--- Grafo gerado com connected=False ---")
+    grafo_desconexo = generate_random_graph(20, 60, connected=False, seed=7)
+    print(f"Grafo: {grafo_desconexo.size} vertices, {contar_arcos(grafo_desconexo)} arcos")
+    grafo_desconexo.print_connectivity()
+    grafo_desconexo.print_cyclic()
+    componentes = grafo_desconexo.connected_components()
+    print(f"Numero de componentes: {len(componentes)}")
 
 
 def testar_reprodutibilidade():
@@ -69,9 +76,9 @@ def testar_reprodutibilidade():
             for node in grafo.adjacency_list[i]
         )
 
-    grafo_a = generate_random_graph(30, 100, seed=123)
-    grafo_b = generate_random_graph(30, 100, seed=123)
-    grafo_c = generate_random_graph(30, 100, seed=999)
+    grafo_a = generate_random_graph(30, 100, connected=True, seed=123)
+    grafo_b = generate_random_graph(30, 100, connected=True, seed=123)
+    grafo_c = generate_random_graph(30, 100, connected=True, seed=999)
 
     print(
         f"\nMesma semente (123 e 123) gera grafo identico: "
@@ -84,14 +91,14 @@ def testar_reprodutibilidade():
 
 
 def testar_grafo_grande():
-    """Gera um grafo grande que cumpre os minimos do enunciado."""
+    """Gera um grafo grande."""
     print("\n" + "=" * 55)
     print("TESTE 4: Grafo aleatorio grande")
     print("=" * 55)
 
     inicio = time.time()
     grafo = generate_random_graph(
-        num_vertices=5000, num_arcs=20000,
+        num_vertices=5000, num_arcs=20000, connected=True,
         min_weight=1.0, max_weight=10000.0,
         seed=2024,
     )
