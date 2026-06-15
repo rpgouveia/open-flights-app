@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-from openflights.loader import build_graph
+from openflights.loader import build_graph, load_airports
 from random_graph.generator import generate_random_graph
 from pajek.pajek_io import write_pajek
 
@@ -8,29 +8,39 @@ st.set_page_config(page_title="OpenFlights - Malha Aérea", layout="wide")
 
 @st.cache_resource
 def load_dataset():
-    """
-    Carrega o grafo do OpenFlights em cache para evitar recarregamento
-    a cada interação do usuário na interface.
-    """
     airports_path = os.path.join("dataset", "airports.dat")
     routes_path = os.path.join("dataset", "routes.dat")
     
     if not os.path.exists(airports_path) or not os.path.exists(routes_path):
-        return None, None
+        return None, None, None
         
     flight_graph, id_to_index_map = build_graph(airports_path, routes_path)
-    return flight_graph, id_to_index_map
+    airports_data = load_airports(airports_path)
+    
+    return flight_graph, id_to_index_map, airports_data
 
-flight_graph, id_to_index = load_dataset()
+flight_graph, id_to_index, airports_data = load_dataset()
 
 if flight_graph is None:
     st.error("Arquivos do dataset não encontrados. Certifique-se de que airports.dat e routes.dat estão na pasta 'dataset/'.")
     st.stop()
 
-airport_labels = [flight_graph.vertices[index] for index in range(flight_graph.size)]
+index_to_display = {}
+for airport_id, index in id_to_index.items():
+    data = airports_data[airport_id]
+    iata = data["iata"]
+    name = data["name"]
+    
+    if iata and iata != "\\N":
+        index_to_display[index] = f"{name} ({iata})"
+    else:
+        index_to_display[index] = name
+
+valid_indices = list(index_to_display.keys())
+valid_indices.sort(key=lambda idx: index_to_display[idx])
 
 st.title("OpenFlights - Análise de Malha Aérea")
-st.markdown("Aplicação de grafos de alta dimensionalidade para rotas de voos.")
+st.markdown("Aplicação de grafos para rotas de voos.")
 
 selected_menu = st.sidebar.selectbox(
     "Navegação",
@@ -60,23 +70,31 @@ elif selected_menu == "2. Buscar Rota (Dijkstra)":
     
     col1, col2 = st.columns(2)
     with col1:
-        origin_label = st.selectbox("Aeroporto de Origem", airport_labels)
+        origin_index = st.selectbox(
+            "Aeroporto de Origem", 
+            options=valid_indices,
+            format_func=lambda idx: index_to_display[idx]
+        )
     with col2:
-        destination_label = st.selectbox("Aeroporto de Destino", airport_labels)
+        destination_index = st.selectbox(
+            "Aeroporto de Destino", 
+            options=valid_indices,
+            format_func=lambda idx: index_to_display[idx]
+        )
         
     if st.button("Buscar Melhor Rota"):
-        origin_index = airport_labels.index(origin_label)
-        destination_index = airport_labels.index(destination_label)
-        
-        distance_map, previous_map = flight_graph.dijkstra_heap(origin_index)
-        
-        if distance_map[destination_index] == float('inf'):
-            st.warning("Não há uma rota disponível conectando estes dois aeroportos.")
+        if origin_index == destination_index:
+            st.warning("O aeroporto de destino deve ser diferente do aeroporto de origem.")
         else:
-            path_str = flight_graph.reconstruct_path(origin_index, destination_index, previous_map)
-            st.success("Rota encontrada com sucesso!")
-            st.write(f"**Distância Estimada:** {distance_map[destination_index]:.2f} km")
-            st.write(f"**Trajeto:** {path_str}")
+            distance_map, previous_map = flight_graph.dijkstra_heap(origin_index)
+            
+            if distance_map[destination_index] == float('inf'):
+                st.warning("Não há uma rota disponível conectando estes dois aeroportos.")
+            else:
+                path_str = flight_graph.reconstruct_path(origin_index, destination_index, previous_map)
+                st.success("Rota encontrada com sucesso!")
+                st.write(f"**Distância Estimada:** {distance_map[destination_index]:.2f} km")
+                st.write(f"**Trajeto:** {path_str}")
 
 elif selected_menu == "3. Análise Estrutural":
     st.header("Validações do Grafo")
@@ -157,8 +175,8 @@ elif selected_menu == "5. Grafo Aleatório (Pajek)":
             )
             st.success(f"Grafo gerado: {requested_vertices} vértices e {requested_arcs} arestas.")
             
-            os.makedirs("docs", exist_ok=True)
-            export_path = os.path.join("docs", "grafo-aleatorio-resultante.net")
+            os.makedirs("results", exist_ok=True)
+            export_path = os.path.join("results", "grafo-aleatorio.net")
             write_pajek(generated_graph, export_path)
             
             st.info(f"Arquivo exportado com sucesso para: `{export_path}`")
