@@ -336,9 +336,9 @@ class DirectedGraph:
     def print_cyclic(self):
         """Imprime se o grafo possui ciclo ou não."""
         if self.is_cyclic():
-            print("O grafo possui ciclo (e ciclico).")
+            print("O grafo é CÍCLICO.")
         else:
-            print("O grafo NAO possui ciclo (e aciclico).")
+            print("O grafo é ACÍCLICO.")
 
     def _build_undirected_adjacency(self) -> list[list[int]]:
         """
@@ -373,7 +373,7 @@ class DirectedGraph:
         neighbors = self._build_undirected_adjacency()
         visited = [False] * self.size
 
-        # travessia em largura a partir do vértice 0
+        # travessia em largura
         queue = [0]
         visited[0] = True
         visited_count = 1
@@ -500,8 +500,7 @@ class DirectedGraph:
         saída) pertencem a um único componente fracamente conectado. O(v + e)
 
         Vértices sem nenhum arco são ignorados, pois não participam de um
-        eventual caminho euleriano. Essa conexão é pré-requisito para a
-        existência de caminho ou circuito euleriano.
+        eventual caminho euleriano.
         """
         out_degree, in_degree = self._degrees()
         neighbors = self._build_undirected_adjacency()
@@ -573,7 +572,7 @@ class DirectedGraph:
         if self.has_eulerian_path():
             print("O grafo possui um caminho euleriano.")
         else:
-            print("O grafo NAO possui um caminho euleriano.")
+            print("O grafo NÃO possui um caminho euleriano.")
 
     # Medidas de Centralidade
     def closeness_centrality(self, vertices: list[int] = None) -> dict[int, float]:
@@ -616,7 +615,7 @@ class DirectedGraph:
         for origin in vertices:
             distance, _ = self.dijkstra_heap(origin)
 
-            # soma as distâncias até os vértices alcançáveis (exceto o próprio)
+            # soma as distâncias até os vértices alcançáveis, exceto o próprio
             reachable_count = 0
             distance_sum = 0.0
             for target in range(self.size):
@@ -643,8 +642,6 @@ class DirectedGraph:
         os demais em distância de caminho mínimo).
         """
         centrality = self.closeness_centrality(vertices)
-
-        # ordena do maior para o menor valor de proximidade
         ranking = sorted(centrality.items(), key=lambda pair: pair[1], reverse=True)
 
         print(f"Top {top} vertices por centralidade de proximidade:")
@@ -654,8 +651,7 @@ class DirectedGraph:
 
     def betweenness_centrality(self, vertices: list[int] = None) -> dict[int, float]:
         """
-        Calcula a centralidade de intermediação (betweenness) dos vértices.
-        O(k (n+e) log n)
+        Calcula a centralidade de intermediação (betweenness) dos vértices. O(k (n+e) log n)
 
         Esta implementação reaproveita o Dijkstra (versão com heap) e reconstrói
         UM caminho mínimo por par origem-destino, usando o vetor de predecessores.
@@ -683,8 +679,8 @@ class DirectedGraph:
                 if target == origin or distance[target] == float("inf"):
                     continue
 
-                # caminha do destino até a origem pelos predecessores,
-                # creditando os vértices intermediários (exclui origem e destino)
+                # caminha do destino até a origem pelos predecessores
+                # creditando apenas os vértices intermediários
                 current = previous[target]
                 while current != -1 and current != origin:
                     centrality[current] += 1
@@ -700,8 +696,6 @@ class DirectedGraph:
         que correspondem aos principais pontos de passagem (hubs/pontes) da rede.
         """
         centrality = self.betweenness_centrality(vertices)
-
-        # ordena do maior para o menor valor de intermediação
         ranking = sorted(centrality.items(), key=lambda pair: pair[1], reverse=True)
 
         print(f"Top {top} vertices por centralidade de intermediacao:")

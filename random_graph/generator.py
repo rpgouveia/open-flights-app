@@ -43,7 +43,8 @@ def generate_random_graph(
         num_vertices: int, num_arcs: int,
         connected: bool = True,
         min_weight: float = 1.0, max_weight: float = 10000.0,
-        seed: int = None) -> DirectedGraph:
+        seed: int = None
+    ) -> DirectedGraph:
     """
     Gera um grafo direcionado aleatório com pesos. O(num_arcs)
 
