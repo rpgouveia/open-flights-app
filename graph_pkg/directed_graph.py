@@ -263,7 +263,7 @@ class DirectedGraph:
         self.breadth_first_search_recursive(visited, queue)
 
 # Verificação de ciclos, componentes, conectividade
-    def has_cycle_util(self, vertex: int, visited: list[bool], rec_stack: list[bool]) -> bool:
+    def is_cyclic_recursive(self, vertex: int, visited: list[bool], rec_stack: list[bool]) -> bool:
         """
         Função auxiliar para detectar ciclos usando DFS. O(v + e)  
         Busca em profundidade recursiva com controle de pilha de recursão para detectar ciclos.
