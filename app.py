@@ -1,0 +1,167 @@
+import os
+import streamlit as st
+from openflights.loader import build_graph
+from random_graph.generator import generate_random_graph
+from pajek.pajek_io import write_pajek
+
+st.set_page_config(page_title="OpenFlights - Malha Aérea", layout="wide")
+
+@st.cache_resource
+def load_dataset():
+    """
+    Carrega o grafo do OpenFlights em cache para evitar recarregamento
+    a cada interação do usuário na interface.
+    """
+    airports_path = os.path.join("dataset", "airports.dat")
+    routes_path = os.path.join("dataset", "routes.dat")
+    
+    if not os.path.exists(airports_path) or not os.path.exists(routes_path):
+        return None, None
+        
+    flight_graph, id_to_index_map = build_graph(airports_path, routes_path)
+    return flight_graph, id_to_index_map
+
+flight_graph, id_to_index = load_dataset()
+
+if flight_graph is None:
+    st.error("Arquivos do dataset não encontrados. Certifique-se de que airports.dat e routes.dat estão na pasta 'dataset/'.")
+    st.stop()
+
+airport_labels = [flight_graph.vertices[index] for index in range(flight_graph.size)]
+
+st.title("OpenFlights - Análise de Malha Aérea")
+st.markdown("Aplicação de grafos de alta dimensionalidade para rotas de voos.")
+
+selected_menu = st.sidebar.selectbox(
+    "Navegação",
+    [
+        "1. Visão Geral", 
+        "2. Buscar Rota (Dijkstra)", 
+        "3. Análise Estrutural", 
+        "4. Centralidades", 
+        "5. Grafo Aleatório (Pajek)"
+    ]
+)
+
+if selected_menu == "1. Visão Geral":
+    st.header("Informações do Dataset")
+    total_edges = sum(len(flight_graph.adjacency_list[i]) for i in range(flight_graph.size))
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(label="Total de Aeroportos (Nós)", value=flight_graph.size)
+    with col2:
+        st.metric(label="Total de Rotas (Arestas)", value=total_edges)
+        
+    st.info("Utilize o menu lateral para navegar pelas funcionalidades.")
+
+elif selected_menu == "2. Buscar Rota (Dijkstra)":
+    st.header("Planejamento de Rota (Caminho Mínimo)")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        origin_label = st.selectbox("Aeroporto de Origem", airport_labels)
+    with col2:
+        destination_label = st.selectbox("Aeroporto de Destino", airport_labels)
+        
+    if st.button("Buscar Melhor Rota"):
+        origin_index = airport_labels.index(origin_label)
+        destination_index = airport_labels.index(destination_label)
+        
+        distance_map, previous_map = flight_graph.dijkstra_heap(origin_index)
+        
+        if distance_map[destination_index] == float('inf'):
+            st.warning("Não há uma rota disponível conectando estes dois aeroportos.")
+        else:
+            path_str = flight_graph.reconstruct_path(origin_index, destination_index, previous_map)
+            st.success("Rota encontrada com sucesso!")
+            st.write(f"**Distância Estimada:** {distance_map[destination_index]:.2f} km")
+            st.write(f"**Trajeto:** {path_str}")
+
+elif selected_menu == "3. Análise Estrutural":
+    st.header("Validações do Grafo")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("Analisar Conectividade e Componentes"):
+            is_connected = flight_graph.is_connected()
+            if is_connected:
+                st.success("O grafo é fracamente conexo.")
+            else:
+                st.warning("O grafo NÃO é fracamente conexo. Extraindo componentes...")
+                components = flight_graph.connected_components()
+                components.sort(key=len, reverse=True)
+                
+                st.write(f"**Total de Componentes Encontrados:** {len(components)}")
+                st.write("Top 5 maiores componentes:")
+                for i, comp in enumerate(components[:5]):
+                    st.write(f"- Componente {i+1}: {len(comp)} vértices")
+
+    with col2:
+        if st.button("Verificar Ciclos"):
+            if flight_graph.is_cyclic():
+                st.success("O grafo possui ciclos (Cíclico).")
+            else:
+                st.info("O grafo não possui ciclos (Acíclico).")
+                
+        if st.button("Verificar Caminho Euleriano"):
+            if flight_graph.has_eulerian_path():
+                st.success("O grafo possui um Caminho Euleriano.")
+            else:
+                st.warning("O grafo NÃO possui um Caminho Euleriano.")
+
+elif selected_menu == "4. Centralidades":
+    st.header("Análise de Importância dos Aeroportos")
+    st.info("O cálculo utiliza a fórmula com fator de correção para grafos desconexos.")
+    
+    if st.button("Processar Top 10 Aeroportos (Maior Componente)"):
+        with st.spinner("Computando centralidades... Isso pode levar alguns segundos."):
+            components = flight_graph.connected_components()
+            main_component = max(components, key=len)
+            
+            closeness_metrics = flight_graph.closeness_centrality(main_component)
+            betweenness_metrics = flight_graph.betweenness_centrality(main_component)
+            
+            top_closeness = sorted(closeness_metrics.items(), key=lambda x: x[1], reverse=True)[:10]
+            top_betweenness = sorted(betweenness_metrics.items(), key=lambda x: x[1], reverse=True)[:10]
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.subheader("Proximidade (Closeness)")
+                for rank, (vertex, value) in enumerate(top_closeness, start=1):
+                    st.write(f"**{rank}.** {flight_graph.vertices[vertex]} - `{value:.6f}`")
+                    
+            with col2:
+                st.subheader("Intermediação (Betweenness)")
+                for rank, (vertex, value) in enumerate(top_betweenness, start=1):
+                    st.write(f"**{rank}.** {flight_graph.vertices[vertex]} - `{value:.0f}`")
+
+elif selected_menu == "5. Grafo Aleatório (Pajek)":
+    st.header("Gerador Aleatório e Exportação Pajek")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        requested_vertices = st.number_input("Número de Vértices", min_value=1, value=100)
+    with col2:
+        requested_arcs = st.number_input("Número de Arestas", min_value=0, value=500)
+        
+    force_connectivity = st.checkbox("Garantir conexidade", value=True)
+    
+    if st.button("Gerar Grafo e Exportar"):
+        try:
+            generated_graph = generate_random_graph(
+                requested_vertices, 
+                requested_arcs, 
+                connected=force_connectivity
+            )
+            st.success(f"Grafo gerado: {requested_vertices} vértices e {requested_arcs} arestas.")
+            
+            os.makedirs("docs", exist_ok=True)
+            export_path = os.path.join("docs", "grafo-aleatorio-resultante.net")
+            write_pajek(generated_graph, export_path)
+            
+            st.info(f"Arquivo exportado com sucesso para: `{export_path}`")
+            
+        except ValueError as error_msg:
+            st.error(f"Erro de validação: {error_msg}")
