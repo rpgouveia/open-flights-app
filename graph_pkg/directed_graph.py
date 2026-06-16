@@ -50,42 +50,7 @@ class DirectedGraph:
         labels = [self.vertices[j] for j in adjacent_indices]
         print(f"{count} adjacente(s) ao vértice {self.vertices[vertex]}: {labels}")
 
-    # Warshall e Dijkstra
-    def convert_to_adj_matrix(self) -> list[list[int]]:
-        """
-        Converte as listas de adjacência para uma matriz de adjacência. O(n + m)
-        Retorna uma matriz n×n onde matrix[i][j] = 1 se existe aresta i → j.
-        Não modifica o estado interno do grafo.
-        """
-        matrix = [[0] * self.size for _ in range(self.size)]
-        for i in range(self.size):
-            for node in self.adjacency_list[i]:
-                matrix[i][node.destination] = 1
-        return matrix
-
-    def warshall(self) -> list[list[int]]:
-        """
-        Executa o algoritmo de Warshall sobre uma cópia da matriz de adjacência.
-        Retorna a matriz de alcançabilidade (fechamento transitivo). O(n³)
-        Para cada par (i, j), matrix[i][j] = 1 se j é alcançável a partir de i.
-        """
-        matrix = self.convert_to_adj_matrix()
-        for k in range(self.size):
-            for i in range(self.size):
-                for j in range(self.size):
-                    if matrix[i][k] and matrix[k][j]:
-                        matrix[i][j] = 1
-        return matrix
-
-    def print_reachability(self):
-        """Imprime a matriz de alcançabilidade com os rótulos dos vértices."""
-        matrix = self.warshall()
-        header = "    " + "  ".join(f"{self.vertices[j]:>2}" for j in range(self.size))
-        print(header)
-        for i in range(self.size):
-            row = "   ".join(str(matrix[i][j]) for j in range(self.size))
-            print(f"{self.vertices[i]:>2} [ {row} ]")
-
+    # Dijkstra
     def dijkstra(self, origin: int) -> tuple[list[int], list[int]]:
         """
         Executa o algoritmo de Dijkstra a partir do vértice de origem. O(n²)
@@ -191,78 +156,7 @@ class DirectedGraph:
                 f"  {origin_label} → {self.vertices[i]:>2}: custo={cost:>4}   caminho: {path}"
             )
 
-    # Busca em profundidade e largura
-    def depth_first_search_iterative(self, start: int, visited: list[bool]):
-        """Versão iterativa da busca em profundidade. O(v + e)"""
-        stack = [start]
-        while stack:
-            current = stack.pop()
-            if not visited[current]:
-                visited[current] = True
-                print(f"Visitando {self.vertices[current]}")
-                for node in reversed(self.adjacency_list[current]):
-                    if not visited[node.destination]:
-                        stack.append(node.destination)
-
-    def depth_first_search_recursive(self, start: int, visited: list[bool]):
-        """Versão recursiva da busca em profundidade. O(v + e)"""
-        visited[start] = True
-        print(f"Visitando {self.vertices[start]}")
-        for node in self.adjacency_list[start]:
-            if not visited[node.destination]:
-                self.depth_first_search_recursive(node.destination, visited)
-
-    def print_dfs_iterative(self, start: int):
-        """Inicia a busca em profundidade e imprime os vértices visitados."""
-        visited = [False] * self.size
-        print(f"Busca em profundidade a partir de {self.vertices[start]}:")
-        self.depth_first_search_iterative(start, visited)
-
-    def print_dfs_recursive(self, start: int):
-        """Inicia a busca em profundidade recursiva e imprime os vértices visitados."""
-        visited = [False] * self.size
-        print(f"Busca em profundidade recursiva a partir de {self.vertices[start]}:")
-        self.depth_first_search_recursive(start, visited)
-
-    def breadth_first_search_iterative(self, start: int):
-        """Versão iterativa da busca em largura. O(n)"""
-        visited = [False] * self.size
-        queue = [start]
-        visited[start] = True
-        while queue:
-            current = queue.pop(0)
-            print(f"Visitando {self.vertices[current]}")
-            for node in self.adjacency_list[current]:
-                if not visited[node.destination]:
-                    visited[node.destination] = True
-                    queue.append(node.destination)
-
-    def breadth_first_search_recursive(self, visited: list[bool], queue: list[int]):
-        """Versão recursiva da busca em largura. O(n)"""
-        if not queue:
-            return
-        current = queue.pop(0)
-        print(f"Visitando {self.vertices[current]}")
-        for node in self.adjacency_list[current]:
-            if not visited[node.destination]:
-                visited[node.destination] = True
-                queue.append(node.destination)
-        self.breadth_first_search_recursive(visited, queue)
-
-    def print_bfs_iterative(self, start: int):
-        """Inicia a busca em largura e imprime os vértices visitados."""
-        print(f"Busca em largura a partir de {self.vertices[start]}:")
-        self.breadth_first_search_iterative(start)
-
-    def print_bfs_recursive(self, start: int):
-        """Inicia a busca em largura recursiva e imprime os vértices visitados."""
-        visited = [False] * self.size
-        queue = [start]
-        visited[start] = True
-        print(f"Busca em largura recursiva a partir de {self.vertices[start]}:")
-        self.breadth_first_search_recursive(visited, queue)
-
-# Verificação de ciclos, componentes, conectividade
+    # Verificação de ciclos, componentes, conectividade
     def is_cyclic_recursive(self, vertex: int, visited: list[bool], rec_stack: list[bool]) -> bool:
         """
         Função auxiliar para detectar ciclos usando DFS. O(v + e)  
@@ -274,7 +168,7 @@ class DirectedGraph:
         for node in self.adjacency_list[vertex]:
             destination = node.destination
             if not visited[destination]:
-                if self.has_cycle_util(destination, visited, rec_stack):
+                if self.is_cyclic_recursive(destination, visited, rec_stack):
                     return True
             elif rec_stack[destination]:
                 return True
