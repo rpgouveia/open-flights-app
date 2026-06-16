@@ -40,7 +40,7 @@ def main():
     # carregamento dos dados
     print("\nCarregando aeroportos e rotas...")
     inicio = time.time()
-    grafo, id_to_index = build_graph(AIRPORTS_PATH, ROUTES_PATH)
+    grafo, id_to_index, _ = build_graph(AIRPORTS_PATH, ROUTES_PATH)
     tempo = time.time() - inicio
     print(f"Grafo construido em {tempo:.2f}s")
 
@@ -122,7 +122,8 @@ def main():
     caminho_log = "centrality.log"
     print(f"\nGravando log das centralidades em '{caminho_log}'...")
     write_centrality_log(
-        grafo, closeness, betweenness, caminho_log,top=10, component_size=len(maior_componente)
+        grafo, closeness, betweenness, caminho_log,
+        top=10, component_size=len(maior_componente)
     )
     print("Log gravado.")
 

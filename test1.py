@@ -1,14 +1,26 @@
 """
 Script de teste para os módulos já implementados do projeto.
 
-Testa, sobre grafos pequenos montados à mão:
-    1. Gravação em formato Pajek
-    2. Carregamento de formato Pajek
-    3. Verificação de conexidade fraca
+Parte 1 - Testes didáticos com grafos pequenos montados à mão:
+    1. Gravação em formato Pajek (write_pajek)
+    2. Carregamento de formato Pajek (read_pajek)
+    3. Verificação de conexidade fraca (is_connected)
+
+Parte 2 - Teste com os dados reais do OpenFlights:
+    4. Carregamento dos aeroportos e rotas
+    5. Estatísticas do grafo (nós, arcos)
+    6. Gravação do grafo real em formato Pajek
+    7. Verificação de conexidade do grafo real
 """
 
-from graph_pkg import DirectedGraph
+import time
+from graph_pkg.directed_graph import DirectedGraph
 from pajek import write_pajek, read_pajek
+from openflights import build_graph
+
+
+AIRPORTS_PATH = "dataset/airports.dat"
+ROUTES_PATH = "dataset/routes.dat"
 
 
 def construir_grafo_exemplo() -> DirectedGraph:
@@ -37,6 +49,11 @@ def construir_grafo_exemplo() -> DirectedGraph:
     return grafo
 
 
+def contar_arcos(grafo: DirectedGraph) -> int:
+    """Conta o total de arcos do grafo."""
+    return sum(len(grafo.adjacency_list[i]) for i in range(grafo.size))
+
+
 def testar_gravacao_e_carregamento():
     """Testa o ciclo de gravar em Pajek e carregar de volta."""
     print("=" * 55)
@@ -48,14 +65,12 @@ def testar_gravacao_e_carregamento():
     print("\nGrafo original (listas de adjacencia):")
     grafo.print_adjacency()
 
-    # grava em arquivo Pajek
     caminho = "grafo_teste.net"
     write_pajek(grafo, caminho)
     print(f"\nGrafo gravado em '{caminho}'. Conteudo do arquivo:\n")
     with open(caminho, "r", encoding="utf-8") as arquivo:
         print(arquivo.read())
 
-    # carrega de volta
     grafo_carregado = read_pajek(caminho)
     print("Grafo carregado do arquivo (listas de adjacencia):")
     grafo_carregado.print_adjacency()
@@ -67,24 +82,57 @@ def testar_conexidade():
     print("TESTE 2: Verificacao de conexidade fraca")
     print("=" * 55)
 
-    # grafo conexo (todos os aeroportos alcancaveis ignorando direcao)
     print("\nGrafo de exemplo (rotas conectadas):")
     grafo_conexo = construir_grafo_exemplo()
     grafo_conexo.print_connectivity()
 
-    # grafo desconexo: dois grupos isolados de aeroportos
     print("\nGrafo com dois grupos isolados:")
     grafo_desconexo = DirectedGraph(4)
     for indice, rotulo in enumerate(["GRU", "GIG", "JFK", "LAX"]):
         grafo_desconexo.update_information(indice, rotulo)
-    grafo_desconexo.create_adjacency(0, 1, 357.5)   # GRU <-> GIG (Brasil)
-    grafo_desconexo.create_adjacency(2, 3, 3974.0)  # JFK <-> LAX (EUA), sem ligacao com o Brasil
+    grafo_desconexo.create_adjacency(0, 1, 357.5)
+    grafo_desconexo.create_adjacency(2, 3, 3974.0)
     grafo_desconexo.print_connectivity()
+
+
+def testar_dados_reais():
+    """Carrega os dados reais do OpenFlights e executa as etapas sobre eles."""
+    print("\n" + "=" * 55)
+    print("TESTE 3: Dados reais do OpenFlights")
+    print("=" * 55)
+
+    print("\nCarregando aeroportos e rotas...")
+    inicio = time.time()
+    grafo, id_to_index, _ = build_graph(AIRPORTS_PATH, ROUTES_PATH)
+    tempo = time.time() - inicio
+    print(f"Grafo construido em {tempo:.2f}s")
+
+    # estatisticas
+    total_arcos = contar_arcos(grafo)
+    print(f"\nNos (aeroportos): {grafo.size}")
+    print(f"Arcos (rotas): {total_arcos}")
+
+    # gravacao em Pajek
+    caminho = "openflights.net"
+    print(f"\nGravando grafo completo em '{caminho}'...")
+    inicio = time.time()
+    write_pajek(grafo, caminho)
+    tempo = time.time() - inicio
+    print(f"Arquivo gravado em {tempo:.2f}s")
+
+    # conexidade do grafo real
+    print("\nVerificando conexidade do grafo real...")
+    inicio = time.time()
+    conexo = grafo.is_connected()
+    tempo = time.time() - inicio
+    print(f"Verificacao concluida em {tempo:.2f}s")
+    grafo.print_connectivity()
 
 
 def main():
     testar_gravacao_e_carregamento()
     testar_conexidade()
+    testar_dados_reais()
     print("\nTestes concluidos.")
 
 

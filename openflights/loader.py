@@ -165,5 +165,5 @@ def build_graph(airports_path: str, routes_path: str) -> tuple[DirectedGraph, di
 
         graph.create_adjacency(source_index, destination_index, distance)
 
-    # Retorna também o dicionário bruto de aeroportos
+    # retorna também o dicionário bruto de aeroportos com as coordenadas
     return graph, id_to_index, airports
