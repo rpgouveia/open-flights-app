@@ -56,6 +56,26 @@ open-flights-app/
 - Python 3.10 ou superior.
 - Streamlit (`pip install streamlit`).
 
+### Ambiente Virtual
+
+É recomendado usar um ambiente virtual para isolar as dependências do projeto:
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Instale as dependências do projeto:
+
+```bash
+pip install -r requirements.txt
+```
+
 ### Dataset
 
 Baixe os arquivos `airports.dat` e `routes.dat` da
