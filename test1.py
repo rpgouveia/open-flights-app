@@ -1,10 +1,10 @@
 """
-Script de teste com grafos pequenos montados a mao.
+Script de teste com grafos pequenos montados a mão.
 
-Testes didaticos dos modulos basicos:
-    1. Gravacao em formato Pajek (write_pajek)
+Testes didáticos dos módulos básicos:
+    1. Gravação em formato Pajek (write_pajek)
     2. Carregamento de formato Pajek (read_pajek)
-    3. Verificacao de conexidade fraca (is_connected)
+    3. Verificação de conexidade fraca (is_connected)
 """
 
 from graph_pkg.directed_graph import DirectedGraph
@@ -40,29 +40,29 @@ def construir_grafo_exemplo() -> DirectedGraph:
 def testar_gravacao_e_carregamento():
     """Testa o ciclo de gravar em Pajek e carregar de volta."""
     print("=" * 55)
-    print("TESTE 1: Gravacao e carregamento em formato Pajek")
+    print("TESTE 1: Gravação e carregamento em formato Pajek")
     print("=" * 55)
 
     grafo = construir_grafo_exemplo()
 
-    print("\nGrafo original (listas de adjacencia):")
+    print("\nGrafo original (listas de adjacência):")
     grafo.print_adjacency()
 
     caminho = "grafo_teste.net"
     write_pajek(grafo, caminho)
-    print(f"\nGrafo gravado em '{caminho}'. Conteudo do arquivo:\n")
+    print(f"\nGrafo gravado em '{caminho}'. Conteúdo do arquivo:\n")
     with open(caminho, "r", encoding="utf-8") as arquivo:
         print(arquivo.read())
 
     grafo_carregado = read_pajek(caminho)
-    print("Grafo carregado do arquivo (listas de adjacencia):")
+    print("Grafo carregado do arquivo (listas de adjacência):")
     grafo_carregado.print_adjacency()
 
 
 def testar_conexidade():
-    """Testa a verificacao de conexidade fraca em diferentes grafos."""
+    """Testa a verificação de conexidade fraca em diferentes grafos."""
     print("\n" + "=" * 55)
-    print("TESTE 2: Verificacao de conexidade fraca")
+    print("TESTE 2: Verificação de conexidade fraca")
     print("=" * 55)
 
     print("\nGrafo de exemplo (rotas conectadas):")
@@ -81,7 +81,7 @@ def testar_conexidade():
 def main():
     testar_gravacao_e_carregamento()
     testar_conexidade()
-    print("\nTestes concluidos.")
+    print("\nTestes concluídos.")
 
 
 if __name__ == "__main__":

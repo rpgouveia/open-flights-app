@@ -70,24 +70,24 @@ def generate_random_graph(
         (deixar um vértice isolado exige no máximo (n-1)*(n-2) arcos).
     """
     if num_vertices < 0:
-        raise ValueError("O numero de vertices nao pode ser negativo.")
+        raise ValueError("O número de vértices não pode ser negativo.")
     if num_arcs < 0:
-        raise ValueError("O numero de arcos nao pode ser negativo.")
+        raise ValueError("O número de arcos não pode ser negativo.")
 
     # número máximo de arcos num grafo direcionado simples
     max_possible_arcs = num_vertices * (num_vertices - 1)
     if num_arcs > max_possible_arcs:
         raise ValueError(
-            f"Arcos demais: pedido {num_arcs}, maximo possivel "
-            f"{max_possible_arcs} para {num_vertices} vertices."
+            f"Arcos demais: pedido {num_arcs}, máximo possível "
+            f"{max_possible_arcs} para {num_vertices} vértices."
         )
 
     if connected:
         # para conectar n vertices sao necessarios ao menos n-1 arcos
         if num_vertices >= 1 and num_arcs < num_vertices - 1:
             raise ValueError(
-                f"Para um grafo conexo com {num_vertices} vertices sao "
-                f"necessarios ao menos {num_vertices - 1} arcos (pedido {num_arcs})."
+                f"Para um grafo conexo com {num_vertices} vértices são "
+                f"necessários ao menos {num_vertices - 1} arcos (pedido {num_arcs})."
             )
     else:
         # para manter ao menos um vertice isolado, os arcos devem caber entre
@@ -97,8 +97,8 @@ def generate_random_graph(
             if num_arcs > max_arcs_keeping_isolated:
                 raise ValueError(
                     f"Arcos demais para um grafo desconexo: pedido {num_arcs}, "
-                    f"maximo {max_arcs_keeping_isolated} para manter a separacao "
-                    f"com {num_vertices} vertices."
+                    f"máximo {max_arcs_keeping_isolated} para manter a separação "
+                    f"com {num_vertices} vértices."
                 )
 
     # gerador local de aleatórios (não interfere no estado global do random)
@@ -128,7 +128,7 @@ def generate_random_graph(
         else:
             allowed_vertices = list(range(num_vertices))
 
-    # completa com arcos aleatorios ate atingir num_arcs
+    # completa com arcos aleatórios até atingir num_arcs
     while len(created_arcs) < num_arcs:
         origin = allowed_vertices[rng.randrange(len(allowed_vertices))]
         destination = allowed_vertices[rng.randrange(len(allowed_vertices))]

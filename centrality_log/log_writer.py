@@ -79,7 +79,7 @@ def write_centrality_log(
         output_file.write("\n")
 
         output_file.write("-" * 60 + "\n")
-        output_file.write(f"RESUMO - Top {top} por intermediacao (betweenness)\n")
+        output_file.write(f"RESUMO - Top {top} por intermediação (betweenness)\n")
         output_file.write("-" * 60 + "\n")
         for line in _format_ranking(graph, betweenness, top, "{:.0f}"):
             output_file.write(line + "\n")
@@ -87,9 +87,9 @@ def write_centrality_log(
 
         # parte 2: listagem completa (todos os vértices, ordenados por intermediação)
         output_file.write("-" * 60 + "\n")
-        output_file.write("COMPLETO - Todos os vertices (ordenado por intermediacao)\n")
+        output_file.write("COMPLETO - Todos os vértices (ordenado por intermediação)\n")
         output_file.write("-" * 60 + "\n")
-        header = f"{'Aeroporto':<12}  {'Proximidade':>14}  {'Intermediacao':>14}"
+        header = f"{'Aeroporto':<12}  {'Proximidade':>14}  {'Intermediação':>14}"
         output_file.write(header + "\n")
         output_file.write(f"{'-' * 12}  {'-' * 14}  {'-' * 14}\n")
 

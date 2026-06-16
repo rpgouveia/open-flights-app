@@ -644,7 +644,7 @@ class DirectedGraph:
         centrality = self.closeness_centrality(vertices)
         ranking = sorted(centrality.items(), key=lambda pair: pair[1], reverse=True)
 
-        print(f"Top {top} vertices por centralidade de proximidade:")
+        print(f"Top {top} vértices por centralidade de proximidade:")
         for position, (vertex, value) in enumerate(ranking[:top], start=1):
             label = self.vertices[vertex]
             print(f"  {position:>2}. {label}: {value:.6f}")
@@ -663,7 +663,7 @@ class DirectedGraph:
                         Se None, considera todos os vértices do grafo.
                         Passar apenas os vértices do maior componente acelera o cálculo.
 
-        Retorna um dicionário {indice_do_vertice: contagem_de_intermediacao}.
+        Retorna um dicionário {indice_do_vertice: contagem_de_intermediação}.
         """
         if vertices is None:
             vertices = list(range(self.size))
@@ -698,7 +698,7 @@ class DirectedGraph:
         centrality = self.betweenness_centrality(vertices)
         ranking = sorted(centrality.items(), key=lambda pair: pair[1], reverse=True)
 
-        print(f"Top {top} vertices por centralidade de intermediacao:")
+        print(f"Top {top} vértices por centralidade de intermediação:")
         for position, (vertex, value) in enumerate(ranking[:top], start=1):
             label = self.vertices[vertex]
             print(f"  {position:>2}. {label}: {int(value)}")

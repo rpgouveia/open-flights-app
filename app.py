@@ -12,7 +12,7 @@ st.set_page_config(page_title="OpenFlights - Malha Aérea", layout="wide")
 @st.cache_resource
 def load_dataset():
     """
-    Carrega o dataset, constroi o grafo e demonstra o ciclo Pajek.
+    Carrega o dataset, constrói o grafo e demonstra o ciclo Pajek.
 
     Fluxo:
         1. build_graph lê os .dat e constrói o grafo original, junto com
@@ -36,7 +36,7 @@ def load_dataset():
     write_pajek(original_graph, pajek_path)
     flight_graph = read_pajek(pajek_path)
 
-    # 3. retorna o grafo relido do Pajek, mais os metadados com as coordenadas
+    # 3. retornar o grafo relido do Pajek, mais os metadados com as coordenadas
     return flight_graph, id_to_index_map, airports_data
 
 

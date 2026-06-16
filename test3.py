@@ -1,12 +1,12 @@
 """
-Script de teste do gerador de grafo aleatorio.
+"""Script de teste do gerador de grafo aleatório.
 
 Demonstra:
-    1. Geracao de um grafo pequeno e visualizacao das adjacencias
-    2. Aplicacao dos algoritmos do projeto sobre o grafo gerado
+    1. Geração de um grafo pequeno e visualização das adjacências
+    2. Aplicação dos algoritmos do projeto sobre o grafo gerado
     3. Reprodutibilidade: mesma semente gera o mesmo grafo
-    4. Geracao de um grafo grande cumprindo os minimos do enunciado
-    5. Gravacao do grafo gerado em formato Pajek
+    4. Geração de um grafo grande cumprindo os mínimos do enunciado
+    5. Gravação do grafo gerado em formato Pajek
 """
 
 import time
@@ -21,9 +21,9 @@ def contar_arcos(grafo) -> int:
 
 
 def testar_grafo_pequeno():
-    """Gera um grafo pequeno e mostra suas adjacencias."""
+    """Gera um grafo pequeno e mostra suas adjacências."""
     print("=" * 55)
-    print("TESTE 1: Grafo aleatorio pequeno")
+    print("TESTE 1: Grafo aleatório pequeno")
     print("=" * 55)
 
     grafo = generate_random_graph(
@@ -33,7 +33,7 @@ def testar_grafo_pequeno():
     )
 
     print(f"\nVertices: {grafo.size}, Arcos: {contar_arcos(grafo)}")
-    print("\nListas de adjacencia (peso em km):")
+    print("\nListas de adjacência (peso em km):") 
     grafo.print_adjacency()
 
 
@@ -93,7 +93,7 @@ def testar_reprodutibilidade():
 def testar_grafo_grande():
     """Gera um grafo grande."""
     print("\n" + "=" * 55)
-    print("TESTE 4: Grafo aleatorio grande")
+    print("TESTE 4: Grafo aleat\u00f3rio grande")
     print("=" * 55)
 
     inicio = time.time()
