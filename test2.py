@@ -127,7 +127,7 @@ def main():
     )
     print("Log gravado.")
 
-    print("\nTeste concluido.")
+    print("\nTeste concluído.")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 """
-"""Script de teste do gerador de grafo aleatório.
+Script de teste do gerador de grafo aleatório.
 
 Demonstra:
     1. Geração de um grafo pequeno e visualização das adjacências
@@ -46,24 +46,24 @@ def testar_algoritmos_sobre_gerado():
     # grafo gerado como conexo
     print("\n--- Grafo gerado com connected=True ---")
     grafo_conexo = generate_random_graph(20, 60, connected=True, seed=7)
-    print(f"Grafo: {grafo_conexo.size} vertices, {contar_arcos(grafo_conexo)} arcos")
+    print(f"Grafo: {grafo_conexo.size} vértices, {contar_arcos(grafo_conexo)} arcos")
     grafo_conexo.print_connectivity()
     grafo_conexo.print_cyclic()
     componentes = grafo_conexo.connected_components()
-    print(f"Numero de componentes: {len(componentes)}")
+    print(f"Número de componentes: {len(componentes)}")
 
     # grafo gerado como desconexo
     print("\n--- Grafo gerado com connected=False ---")
     grafo_desconexo = generate_random_graph(20, 60, connected=False, seed=7)
-    print(f"Grafo: {grafo_desconexo.size} vertices, {contar_arcos(grafo_desconexo)} arcos")
+    print(f"Grafo: {grafo_desconexo.size} vértices, {contar_arcos(grafo_desconexo)} arcos")
     grafo_desconexo.print_connectivity()
     grafo_desconexo.print_cyclic()
     componentes = grafo_desconexo.connected_components()
-    print(f"Numero de componentes: {len(componentes)}")
+    print(f"Número de componentes: {len(componentes)}")
 
 
 def testar_reprodutibilidade():
-    """Mostra que a mesma semente gera grafos identicos."""
+    """Mostra que a mesma semente gera grafos idênticos."""
     print("\n" + "=" * 55)
     print("TESTE 3: Reprodutibilidade com semente")
     print("=" * 55)
@@ -81,7 +81,7 @@ def testar_reprodutibilidade():
     grafo_c = generate_random_graph(30, 100, connected=True, seed=999)
 
     print(
-        f"\nMesma semente (123 e 123) gera grafo identico: "
+        f"\nMesma semente (123 e 123) gera grafo idêntico: "
         f"{assinatura(grafo_a) == assinatura(grafo_b)}"
     )
     print(
@@ -93,7 +93,7 @@ def testar_reprodutibilidade():
 def testar_grafo_grande():
     """Gera um grafo grande."""
     print("\n" + "=" * 55)
-    print("TESTE 4: Grafo aleat\u00f3rio grande")
+    print("TESTE 4: Grafo aleatório grande")
     print("=" * 55)
 
     inicio = time.time()
@@ -106,7 +106,7 @@ def testar_grafo_grande():
 
     total_arcos = contar_arcos(grafo)
     print(f"\nGerado em {tempo:.3f}s")
-    print(f"Vertices: {grafo.size}")
+    print(f"Vértices: {grafo.size}")
     print(f"Arcos: {total_arcos}")
 
     # grava em Pajek
@@ -120,7 +120,7 @@ def main():
     testar_algoritmos_sobre_gerado()
     testar_reprodutibilidade()
     testar_grafo_grande()
-    print("\nTestes concluidos.")
+    print("\nTestes concluídos.")
 
 
 if __name__ == "__main__":
