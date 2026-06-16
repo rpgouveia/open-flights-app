@@ -3,8 +3,11 @@ import streamlit as st
 from openflights.loader import build_graph
 from random_graph.generator import generate_random_graph
 from pajek.pajek_io import write_pajek, read_pajek
+from centrality_log import write_centrality_log
+
 
 st.set_page_config(page_title="OpenFlights - Malha Aérea", layout="wide")
+
 
 @st.cache_resource
 def load_dataset():
@@ -174,6 +177,15 @@ elif selected_menu == "4. Centralidades":
                 st.subheader("Intermediação (Betweenness)")
                 for rank, (vertex, value) in enumerate(top_betweenness, start=1):
                     st.write(f"**{rank}.** {flight_graph.vertices[vertex]} - `{value:.0f}`")
+
+            # grava o log completo
+            os.makedirs("results", exist_ok=True)
+            log_path = os.path.join("results", "centrality.log")
+            write_centrality_log(
+                flight_graph, closeness_metrics, betweenness_metrics,
+                log_path, top=10, component_size=len(main_component)
+            )
+            st.info(f"Log das centralidades gravado em: `{log_path}`")
 
 elif selected_menu == "5. Grafo Aleatório (Pajek)":
     st.header("Gerador Aleatório e Exportação Pajek")
