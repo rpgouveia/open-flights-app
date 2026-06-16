@@ -45,6 +45,7 @@ open-flights-app/
 ├── pajek/                 Gravação e carregamento em formato Pajek
 ├── openflights/           Carregador dos dados e cálculo de distâncias
 ├── random_graph/          Gerador de grafo aleatório
+├── results/               Resultados (Grafos gerados e centralidades)
 └── centrality_log/        Gravação do log das centralidades
 ```
 
