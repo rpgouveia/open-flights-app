@@ -1,7 +1,7 @@
 """
 Script de teste com grafos pequenos montados a mão.
 
-Testes didáticos dos módulos básicos:
+Testes básicos:
     1. Gravação em formato Pajek (write_pajek)
     2. Carregamento de formato Pajek (read_pajek)
     3. Verificação de conexidade fraca (is_connected)
