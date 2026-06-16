@@ -107,7 +107,7 @@ def load_routes(path: str) -> list:
     return routes
 
 
-def build_graph(airports_path: str, routes_path: str) -> tuple[DirectedGraph, dict]:
+def build_graph(airports_path: str, routes_path: str) -> tuple[DirectedGraph, dict, dict]:
     """
     Constrói o grafo direcionado das rotas aéreas a partir dos arquivos
     do OpenFlights.
@@ -117,9 +117,10 @@ def build_graph(airports_path: str, routes_path: str) -> tuple[DirectedGraph, di
     arco, com peso igual à distância em quilômetros pela fórmula de Haversine.
 
     Retorna:
-        (grafo, mapa_id_para_indice)
+        (grafo, mapa_id_para_indice, dicionario_aeroportos)
         grafo: instância de DirectedGraph já preenchida
         mapa_id_para_indice: dicionário do ID OpenFlights para o índice do nó
+        dicionario_aeroportos: dados brutos para uso na interface
     """
     airports = load_airports(airports_path)
     routes = load_routes(routes_path)
@@ -164,4 +165,5 @@ def build_graph(airports_path: str, routes_path: str) -> tuple[DirectedGraph, di
 
         graph.create_adjacency(source_index, destination_index, distance)
 
-    return graph, id_to_index
+    # Retorna também o dicionário bruto de aeroportos
+    return graph, id_to_index, airports

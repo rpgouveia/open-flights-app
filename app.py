@@ -1,8 +1,8 @@
 import os
 import streamlit as st
-from openflights.loader import build_graph, load_airports
+from openflights.loader import build_graph
 from random_graph.generator import generate_random_graph
-from pajek.pajek_io import write_pajek
+from pajek.pajek_io import write_pajek, read_pajek
 
 st.set_page_config(page_title="OpenFlights - Malha Aérea", layout="wide")
 
@@ -10,12 +10,20 @@ st.set_page_config(page_title="OpenFlights - Malha Aérea", layout="wide")
 def load_dataset():
     airports_path = os.path.join("dataset", "airports.dat")
     routes_path = os.path.join("dataset", "routes.dat")
+    pajek_path = os.path.join("dataset", "openflights.net")
     
     if not os.path.exists(airports_path) or not os.path.exists(routes_path):
         return None, None, None
         
-    flight_graph, id_to_index_map = build_graph(airports_path, routes_path)
-    airports_data = load_airports(airports_path)
+    # Lê o grafo construído e recebe os TRÊS retornos (Graph, IDs e Airports Data)
+    temp_graph, id_to_index_map, airports_data = build_graph(airports_path, routes_path)
+    
+    # Gravação do Grafo em Arquivo
+    if not os.path.exists(pajek_path):
+        write_pajek(temp_graph, pajek_path)
+        
+    # Carregamento do Grafo de Arquivo
+    flight_graph = read_pajek(pajek_path)
     
     return flight_graph, id_to_index_map, airports_data
 
@@ -30,11 +38,13 @@ for airport_id, index in id_to_index.items():
     data = airports_data[airport_id]
     iata = data["iata"]
     name = data["name"]
+    clean_name = name.replace("(Duplicate)", "").replace("(duplicate)", "").strip()
     
+    # Formata com a sigla
     if iata and iata != "\\N":
-        index_to_display[index] = f"{name} ({iata})"
+        index_to_display[index] = f"{clean_name} ({iata}) - Nó {index}"
     else:
-        index_to_display[index] = name
+        index_to_display[index] = f"{clean_name} (SEM SIGLA) - Nó {index}"
 
 valid_indices = list(index_to_display.keys())
 valid_indices.sort(key=lambda idx: index_to_display[idx])
